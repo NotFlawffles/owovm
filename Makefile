@@ -1,5 +1,5 @@
 CPP = c++
-CPPFLAGS = -Wall -Wextra -o
+CPPFLAGS = -Wall -Wextra -ggdb -o
 OBJECT = owovm
 SRC = $(wildcard src/*)
 INSTALLATION_PATH = $(PREFIX)/bin
