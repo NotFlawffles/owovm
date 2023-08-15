@@ -10,7 +10,7 @@ std::vector<u16> loadFile(std::string fileName) {
     file.read((char*) &size, sizeof(size));
     program.reserve(size);
     program.resize(size);
-    file.seekg(sizeof(size_t));
+    file.seekg(sizeof(u16));
     file.read((char*) &program[0], size * sizeof(u16));
     file.close();
     
