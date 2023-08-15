@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <functional>
 
 #define MEMORY_SIZE 0xFFFF
@@ -37,7 +37,7 @@ class VM {
         OLd
     };
 
-    std::map<u16, std::function<void(void)>> instructions = {
+    std::unordered_map<u16, std::function<void(void)>> instructions = {
         {OSwp, std::bind(&VM::swp, this)},
         {OAdd, std::bind(&VM::add, this)},
         {OSub, std::bind(&VM::sub, this)},
@@ -103,9 +103,9 @@ class VM {
         FStdout = 0xFF
     };
 
-    std::map<u16, u16> FDS = {{0, FStdin}, {1, FStdout}};
+    std::unordered_map<u16, u16> FDS = {{0, FStdin}, {1, FStdout}};
 
-    std::map<u16, std::function<void(void)>> syscallTable = {
+    std::unordered_map<u16, std::function<void(void)>> syscallTable = {
         {SReset, std::bind(&VM::reset, this)},
         {SExit, std::bind(&VM::exit, this)},
         {SRead, std::bind(&VM::read, this)},
