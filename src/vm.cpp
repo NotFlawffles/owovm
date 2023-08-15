@@ -117,7 +117,10 @@ void VM::cmp(void) {
 }
 
 void VM::pop(void) {
-    memory[sp++] = 0;
+    int16_t count = memory[sp];
+
+    for (int16_t i = -1; i < count; i++)
+        memory[sp++] = 0;
 }
 
 void VM::syscall(void) {

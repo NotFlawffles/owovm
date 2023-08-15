@@ -5,12 +5,12 @@
 
 std::vector<u16> loadFile(std::string fileName) {
     std::ifstream file(fileName, std::ios::in | std::ios::binary);
-    u16 size;
+    size_t size;
     std::vector<u16> program;
-    file.read((char*) &size, sizeof(size));
+    file.read((char*) &size, sizeof(size_t));
     program.reserve(size);
     program.resize(size);
-    file.seekg(sizeof(u16));
+    file.seekg(sizeof(size_t));
     file.read((char*) &program[0], size * sizeof(u16));
     file.close();
     
