@@ -133,6 +133,15 @@ void VM::alloc(void) {
     hp += memory[sp + 1];
 }
 
+void VM::str(void) {
+    memory[memory[sp + 1]] = memory[sp];
+}
+
+void VM::ld(void) {
+    sp--;
+    memory[sp] = memory[memory[sp + 1]];
+}
+
 void VM::kbhit(void) {
     termios oldt, newt;
     int ch;
@@ -163,7 +172,7 @@ void VM::exit(void) {
 }
 
 void VM::read(void) {
-    i16 fd = memory[sp + 3],
+    u16 fd = memory[sp + 3],
         buf = memory[sp + 2],
         count = memory[sp + 1];
 
@@ -173,16 +182,16 @@ void VM::read(void) {
     for (size_t i = 0; i < input.length(); i++)
         memory[i + 1] = input[i];
 
-    for (i16 i = 0, j = FDS[fd]; i < count; i++)
+    for (u16 i = 0, j = FDS[fd]; i < count; i++)
         memory[buf + i] = memory[j + i];
 }
 
 void VM::write(void) {
-    i16 fd = memory[sp + 3],
+    u16 fd = memory[sp + 3],
         buf = memory[sp + 2],
         count = memory[sp + 1];
 
-    for (i16 i = 0; i < count; i++) {
+    for (u16 i = 0; i < count; i++) {
         memory[FDS[fd] + i] = memory[buf + i];
         std::putc(memory[FDS[fd] + i], fd ? stdout : stdin);
     }
@@ -196,12 +205,12 @@ void VM::tick(void) {
 }
 
 VM::VM(void) {
-    memory.reserve(0x1000);
+    memory.reserve(0xFFFF);
 }
 
-void VM::loadProgram(std::vector<i16> program) {
+void VM::loadProgram(std::vector<u16> program) {
     for (size_t i = 0; i < program.size(); i++)
-        memory[i + 513] = program[i];
+        memory[i + 1025] = program[i];
 }
 
 void VM::run(void) {

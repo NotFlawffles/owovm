@@ -5,17 +5,17 @@
 #include <map>
 #include <functional>
 
-#define MEMORY_SIZE 4096
+#define MEMORY_SIZE 0xFFFF
 
-typedef int16_t i16;
+typedef uint16_t u16;
 
 class VM {
-    i16 header, data, pc = 512, sp = MEMORY_SIZE - 1,
-        hp = 0x800, flags = 0x0;
+    u16 header, data, pc = 0x400, sp = MEMORY_SIZE - 0x1,
+        hp = 0x8000, flags = 0x0;
 
-    std::vector<i16> memory;
+    std::vector<u16> memory;
 
-    enum Opcodes : i16 {
+    enum Opcodes : u16 {
         OSwp,
         OAdd,
         OSub,
@@ -32,10 +32,12 @@ class VM {
         OCmp,
         OPop,
         OSyscall,
-        OAlloc
+        OAlloc,
+        OStr,
+        OLd
     };
 
-    std::map<i16, std::function<void(void)>> instructions = {
+    std::map<u16, std::function<void(void)>> instructions = {
         {OSwp, std::bind(&VM::swp, this)},
         {OAdd, std::bind(&VM::add, this)},
         {OSub, std::bind(&VM::sub, this)},
@@ -53,6 +55,8 @@ class VM {
         {OPop, std::bind(&VM::pop, this)},
         {OSyscall, std::bind(&VM::syscall, this)},
         {OAlloc, std::bind(&VM::alloc, this)},
+        {OStr, std::bind(&VM::str, this)},
+        {OLd, std::bind(&VM::ld, this)}
     };
 
     void tick(void);
@@ -80,26 +84,28 @@ class VM {
     void pop(void);
     void syscall(void);
     void alloc(void);
+    void str(void);
+    void ld(void);
 
     // kernel area
 
     void kbhit(void);
 
-    enum Syscalls : i16 {
+    enum Syscalls : u16 {
         SReset,
         SExit,
         SRead,
         SWrite
     };
 
-    enum FD : i16 {
+    enum FD : u16 {
         FStdin = 0x1,
         FStdout = 0xFF
     };
 
-    std::map<i16, i16> FDS = {{0, FStdin}, {1, FStdout}};
+    std::map<u16, u16> FDS = {{0, FStdin}, {1, FStdout}};
 
-    std::map<i16, std::function<void(void)>> syscallTable = {
+    std::map<u16, std::function<void(void)>> syscallTable = {
         {SReset, std::bind(&VM::reset, this)},
         {SExit, std::bind(&VM::exit, this)},
         {SRead, std::bind(&VM::read, this)},
@@ -113,6 +119,6 @@ class VM {
 
     public:
     VM(void);
-    void loadProgram(std::vector<i16> program);
+    void loadProgram(std::vector<u16> program);
     void run(void);
 };
