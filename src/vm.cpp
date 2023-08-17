@@ -1,5 +1,6 @@
 #include "../include/vm.h"
 #include <cstdio>
+#include <algorithm>
 #include <string>
 #include <termios.h>
 #include <unistd.h>
@@ -106,6 +107,7 @@ void VM::mod(void) {
 }
 
 void VM::jump(void) {
+    lr = pc + 1;
     pc = memory[sp] - 1;
     memory[sp++] = 0;
 }
@@ -143,6 +145,16 @@ void VM::str(void) {
 void VM::ld(void) {
     sp--;
     memory[sp] = memory[memory[sp + 1]];
+}
+
+void VM::rev(void) {
+    u16 count = memory[sp];
+    memory[sp++] = 0;
+    std::reverse(memory.begin() + sp, memory.begin() + MEMORY_SIZE - 1 - count);
+}
+
+void VM::ret(void) {
+    pc = lr;
 }
 
 void VM::kbhit(void) {

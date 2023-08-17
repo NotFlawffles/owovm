@@ -11,7 +11,7 @@ typedef uint16_t u16;
 
 class VM {
     u16 header, data, pc = 0x400, sp = MEMORY_SIZE - 0x1,
-        hp = 0x8000, flags = 0x0;
+        hp = 0x8000, flags = 0x0, lr = 0x0;
 
     std::vector<u16> memory;
 
@@ -34,7 +34,9 @@ class VM {
         OSyscall,
         OAlloc,
         OStr,
-        OLd
+        OLd,
+        ORev,
+        ORet
     };
 
     std::unordered_map<u16, std::function<void(void)>> instructions = {
@@ -56,7 +58,9 @@ class VM {
         {OSyscall, std::bind(&VM::syscall, this)},
         {OAlloc, std::bind(&VM::alloc, this)},
         {OStr, std::bind(&VM::str, this)},
-        {OLd, std::bind(&VM::ld, this)}
+        {OLd, std::bind(&VM::ld, this)},
+        {ORev, std::bind(&VM::rev, this)},
+        {ORet, std::bind(&VM::ret, this)}
     };
 
     void tick(void);
@@ -86,6 +90,8 @@ class VM {
     void alloc(void);
     void str(void);
     void ld(void);
+    void rev(void);
+    void ret(void);
 
     // kernel area
 
