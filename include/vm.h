@@ -11,7 +11,9 @@ typedef uint16_t u16;
 
 class VM {
     u16 header, data, pc = 0x400, sp = MEMORY_SIZE - 0x1,
-        hp = 0x8000, flags = 0x0, lr = 0x0;
+        hp = 0x8000, flags = 0x0;
+
+    std::vector<u16> links;
 
     std::vector<u16> memory;
 
@@ -36,7 +38,10 @@ class VM {
         OStr,
         OLd,
         ORev,
-        ORet
+        ODbg,
+        ORet,
+        ODup,
+        OB
     };
 
     std::unordered_map<u16, std::function<void(void)>> instructions = {
@@ -60,7 +65,10 @@ class VM {
         {OStr, std::bind(&VM::str, this)},
         {OLd, std::bind(&VM::ld, this)},
         {ORev, std::bind(&VM::rev, this)},
-        {ORet, std::bind(&VM::ret, this)}
+        {ODbg, std::bind(&VM::dbg, this)},
+        {ORet, std::bind(&VM::ret, this)},
+        {ODup, std::bind(&VM::dup, this)},
+        {OB, std::bind(&VM::b, this)}
     };
 
     void tick(void);
@@ -91,11 +99,12 @@ class VM {
     void str(void);
     void ld(void);
     void rev(void);
+    void dbg(void);
     void ret(void);
+    void dup(void);
+    void b(void);
 
     // kernel area
-
-    void kbhit(void);
 
     enum Syscalls : u16 {
         SReset,
@@ -105,7 +114,7 @@ class VM {
     };
 
     enum FD : u16 {
-        FStdin = 0x1,
+        FStdin = 0x0,
         FStdout = 0xFF
     };
 
@@ -126,5 +135,6 @@ class VM {
     public:
     VM(void);
     void loadProgram(std::vector<u16> program);
-    void run(void);
+    void loadArgs(int argc, char** argv);
+    void run(int argc, char** argv);
 };

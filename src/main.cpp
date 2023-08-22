@@ -26,5 +26,5 @@ int main(int argc, char** argv) {
     std::vector<u16> program = loadFile(argv[1]);
     VM vm;
     vm.loadProgram(program);
-    vm.run();
+    vm.run(argc, argv);
 }

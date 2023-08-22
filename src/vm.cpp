@@ -107,8 +107,8 @@ void VM::mod(void) {
 }
 
 void VM::jump(void) {
-    lr = pc + 1;
-    pc = memory[sp] - 1;
+    links.push_back(pc);
+    pc = 0x400 + memory[sp];
     memory[sp++] = 0;
 }
 
@@ -133,9 +133,9 @@ void VM::alloc(void) {
     if (!memory[sp])
         return;
 
-    memory[hp++] = memory[sp];
-    memory[--sp] = hp;
-    hp += memory[sp + 1];
+    u16 size = memory[sp];
+    memory[sp] = hp;
+    hp += size + 1;
 }
 
 void VM::str(void) {
@@ -153,31 +153,24 @@ void VM::rev(void) {
     std::reverse(memory.begin() + sp, memory.begin() + MEMORY_SIZE - 1 - count);
 }
 
-void VM::ret(void) {
-    pc = lr;
+void VM::dbg(void) {
+    for (u16 i = sp; i < MEMORY_SIZE - 1; i++)
+        std::cout << memory[i] << std::endl;
 }
 
-void VM::kbhit(void) {
-    termios oldt, newt;
-    int ch;
-    int oldf;
+void VM::ret(void) {
+    pc = links.back();
+    links.pop_back();
+}
 
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+void VM::dup(void) {
+    sp--;
+    memory[sp] = memory[sp + 1];
+}
 
-    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
-
-    ch = getchar();
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    fcntl(STDIN_FILENO, F_SETFL, oldf);
-
-    if (ch != EOF)
-        memory[0x0] = ch;
+void VM::b(void) {
+    pc = 0x400 + memory[sp];
+    memory[sp++] = 0;
 }
 
 void VM::reset(void) {}
@@ -216,7 +209,6 @@ void VM::tick(void) {
     fetch();
     decode();
     execute();
-    kbhit();
 }
 
 VM::VM(void) {
@@ -228,7 +220,49 @@ void VM::loadProgram(std::vector<u16> program) {
         memory[i + 1025] = program[i];
 }
 
-void VM::run(void) {
+/*
+ *   u16 size = current.value.size();
+
+    program.push_back(size);
+    program.push_back(Alloc);
+
+    for (u16 i = 0; i < size; i++) {
+        program.push_back(current.value.at(i));
+        program.push_back(Str);
+        program.push_back(0x1);
+        program.push_back(Pop);
+        program.push_back(0x1);
+        program.push_back(Add);
+    }
+
+    program.push_back(size);
+    program.push_back(Sub);
+    current = lexer.next();
+*/
+
+void VM::loadArgs(int argc, char** argv) {
+    for (u16 i = (u16) argc - 1; i > 1; i--) {
+        memory[--sp] = (u16) std::string(argv[i]).size();
+        alloc();
+
+        for (u16 j = 0; j < (u16) std::string(argv[i]).size(); j++) {
+            memory[--sp] = argv[i][j];
+            str();
+            memory[--sp] = 0x1;
+            pop();
+            memory[--sp] = 0x1;
+            add();
+        }
+
+        memory[--sp] = (u16) std::string(argv[i]).size();
+        sub();
+    }
+
+    memory[--sp] = (u16) argc;
+}
+
+void VM::run(int argc, char** argv) {
+    loadArgs(argc, argv);
     flags |= 0x8;
 
     while (flags & 0x8)
