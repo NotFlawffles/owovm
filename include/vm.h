@@ -42,7 +42,9 @@ class VM {
         ODup,
         OB,
         OSet,
-        OGet
+        OGet,
+        OInc,
+        ODec
     };
 
     std::unordered_map<u16, std::function<void(void)>> instructions = {
@@ -70,7 +72,9 @@ class VM {
         {ODup, std::bind(&VM::dup, this)},
         {OB, std::bind(&VM::b, this)},
         {OSet, std::bind(&VM::set, this)},
-        {OGet,   std::bind(&VM::get, this)}
+        {OGet,   std::bind(&VM::get, this)},
+        {OInc,   std::bind(&VM::inc, this)},
+        {ODec,   std::bind(&VM::dec, this)}
     };
 
     void tick(void);
@@ -106,6 +110,8 @@ class VM {
     void b(void);
     void set(void);
     void get(void);
+    void inc(void);
+    void dec(void);
 
     // kernel area
 

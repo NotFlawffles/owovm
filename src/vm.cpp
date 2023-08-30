@@ -185,6 +185,14 @@ void VM::get(void) {
     memory[sp] = memory[0x4000 + memory[sp]];
 }
 
+void VM::inc(void) {
+    memory[sp]++;
+}
+
+void VM::dec(void) {
+    memory[sp]--;
+}
+
 void VM::reset(void) {}
 
 void VM::exit(void) {
