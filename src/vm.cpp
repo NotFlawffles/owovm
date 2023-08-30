@@ -38,11 +38,11 @@ void VM::executeInstruction(void) {
 }
 
 bool VM::matchesFlag(void) {
-    return ((data & 0xF00) >> 0x9) & flags;
+    return ((data >> 0x9) & 0x7) & flags;
 }
 
 bool VM::conditional(void) {
-    return (data & 0x100) >> 0x8;
+    return (data >> 0x8) & 0x1;
 }
 
 void VM::swp(void) {
@@ -147,15 +147,17 @@ void VM::ld(void) {
     memory[sp] = memory[memory[sp + 1]];
 }
 
-void VM::rev(void) {
-    u16 count = memory[sp];
-    memory[sp++] = 0;
-    std::reverse(memory.begin() + sp, memory.begin() + MEMORY_SIZE - 1 - count);
-}
-
 void VM::dbg(void) {
     for (u16 i = sp; i < MEMORY_SIZE - 1; i++)
-        std::cout << memory[i] << std::endl;
+        std::cout
+            << "memory[" << i << "]: "
+            << memory[i]
+            << std::endl;
+
+    std::cout
+        << "carry: " << ((flags & 0x4) >> 0x2) << std::endl
+        << "zero: " << ((flags & 0x2) >> 0x1) << std::endl
+        << "overflow: " << (flags & 0x1) << std::endl;
 }
 
 void VM::ret(void) {
@@ -171,6 +173,16 @@ void VM::dup(void) {
 void VM::b(void) {
     pc = 0x400 + memory[sp];
     memory[sp++] = 0;
+}
+
+void VM::set(void) {
+    memory[0x4000 + memory[sp + 1]] = memory[sp];
+    memory[sp++] = 0;
+    memory[sp++] = 0;
+}
+
+void VM::get(void) {
+    memory[sp] = memory[0x4000 + memory[sp]];
 }
 
 void VM::reset(void) {}

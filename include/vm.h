@@ -37,11 +37,12 @@ class VM {
         OAlloc,
         OStr,
         OLd,
-        ORev,
         ODbg,
         ORet,
         ODup,
-        OB
+        OB,
+        OSet,
+        OGet
     };
 
     std::unordered_map<u16, std::function<void(void)>> instructions = {
@@ -64,11 +65,12 @@ class VM {
         {OAlloc, std::bind(&VM::alloc, this)},
         {OStr, std::bind(&VM::str, this)},
         {OLd, std::bind(&VM::ld, this)},
-        {ORev, std::bind(&VM::rev, this)},
         {ODbg, std::bind(&VM::dbg, this)},
         {ORet, std::bind(&VM::ret, this)},
         {ODup, std::bind(&VM::dup, this)},
-        {OB, std::bind(&VM::b, this)}
+        {OB, std::bind(&VM::b, this)},
+        {OSet, std::bind(&VM::set, this)},
+        {OGet,   std::bind(&VM::get, this)}
     };
 
     void tick(void);
@@ -98,11 +100,12 @@ class VM {
     void alloc(void);
     void str(void);
     void ld(void);
-    void rev(void);
     void dbg(void);
     void ret(void);
     void dup(void);
     void b(void);
+    void set(void);
+    void get(void);
 
     // kernel area
 
